@@ -5,10 +5,13 @@ A powerful web application for experimenting with OpenAI's language models and u
 ## Screenshots
 
 ### Single Response Mode
-[Screenshot showing single response with parameter analysis will be added here]
+<img width="1214" alt="Screenshot 2025-05-28 at 4 09 35 AM" src="https://github.com/user-attachments/assets/e488ca53-bc2d-407c-b8f9-37c32991672d" />
+<img width="1214" alt="Screenshot 2025-05-28 at 4 09 35 AM" src="https://github.com/user-attachments/assets/14683430-a149-4c93-b1aa-ca93178ce4af" />
 
 ### Grid Analysis Mode
-[Screenshot showing grid view with multiple parameter combinations will be added here]
+<img width="839" alt="Screenshot 2025-05-28 at 3 43 14 AM" src="https://github.com/user-attachments/assets/f4f647ab-d0c6-4495-aebf-b29c4afcbf10" />
+<img width="814" alt="Screenshot 2025-05-28 at 3 43 49 AM" src="https://github.com/user-attachments/assets/cbb2bdaa-b083-44da-a90b-ddcce77d3a24" />
+
 
 ## Features
 
