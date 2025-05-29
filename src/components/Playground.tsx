@@ -11,9 +11,24 @@ import {
   GridItem,
   Card,
   CardBody,
+  CardHeader,
   FormControl,
   FormLabel,
   useToast,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  useColorMode,
+  HStack,
+  VStack,
+  Badge,
+  IconButton,
+  Tooltip,
+  Divider,
+  useClipboard,
+  Icon,
 } from '@chakra-ui/react';
 import {
   NumberInputField,
@@ -21,9 +36,15 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from '@chakra-ui/react';
+import { CopyIcon, CheckIcon } from '@chakra-ui/icons';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { PlaygroundConfig, PlaygroundResult, GridResult } from '../types/playground';
 import { DEFAULT_CONFIG } from '../types/playground';
 import { ResponseAnalysis } from './ResponseAnalysis';
+import { RiSendPlaneFill, RiGridFill, RiAiGenerate } from 'react-icons/ri';
+
+const MotionBox = motion(Box);
+const MotionCard = motion(Card);
 
 const Playground: React.FC = () => {
   const [config, setConfig] = useState<PlaygroundConfig>(DEFAULT_CONFIG);
@@ -31,6 +52,7 @@ const Playground: React.FC = () => {
   const [gridResults, setGridResults] = useState<GridResult[]>([]);
   const [isSingleLoading, setSingleLoading] = useState(false);
   const [isGridLoading, setGridLoading] = useState(false);
+  const { colorMode } = useColorMode();
   const toast = useToast();
 
   const handleConfigChange = (field: keyof PlaygroundConfig, value: any) => {
@@ -54,7 +76,7 @@ const Playground: React.FC = () => {
       }
 
       const data = await response.json();
-      setResults(prev => [...prev, { config: { ...config }, response: data.response }]);
+      setResults(prev => [{ config: { ...config }, response: data.response }, ...prev]);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -69,7 +91,7 @@ const Playground: React.FC = () => {
   };
 
   const generateGrid = async () => {
-    if (isGridLoading) return; 
+    if (isGridLoading) return;
     
     setGridLoading(true);
     const temperatures = [0.0, 0.7, 1.2];
@@ -119,7 +141,6 @@ const Playground: React.FC = () => {
                 });
 
                 completedCombinations++;
-                // Update progress
                 toast({
                   title: 'Grid Generation Progress',
                   description: `${completedCombinations}/${totalCombinations} combinations completed`,
@@ -129,7 +150,6 @@ const Playground: React.FC = () => {
                 });
               } catch (error: any) {
                 console.error('Error generating grid item:', error);
-                // Continue with other combinations even if one fails
               }
             }
           }
@@ -150,17 +170,64 @@ const Playground: React.FC = () => {
     }
   };
 
+  const ResultCard = ({ result, index }: { result: PlaygroundResult; index: number }) => {
+    const { hasCopied, onCopy } = useClipboard(result.response);
+    
+    return (
+      <MotionCard
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.1 }}
+      >
+        <CardHeader>
+          <HStack justify="space-between">
+            <Badge colorScheme="brand" fontSize="sm">Result #{results.length - index}</Badge>
+            <Tooltip label={hasCopied ? 'Copied!' : 'Copy response'}>
+              <IconButton
+                aria-label="Copy response"
+                icon={hasCopied ? <CheckIcon /> : <CopyIcon />}
+                size="sm"
+                variant="ghost"
+                onClick={onCopy}
+              />
+            </Tooltip>
+          </HStack>
+        </CardHeader>
+        <CardBody>
+          <VStack align="stretch" spacing={4}>
+            <Box>
+              <Text fontWeight="medium" mb={2}>Configuration</Text>
+              <Grid templateColumns="repeat(2, 1fr)" gap={2}>
+                <Text fontSize="sm">Temperature: {result.config.temperature}</Text>
+                <Text fontSize="sm">Max Tokens: {result.config.maxTokens}</Text>
+                <Text fontSize="sm">Presence Penalty: {result.config.presencePenalty}</Text>
+                <Text fontSize="sm">Frequency Penalty: {result.config.frequencyPenalty}</Text>
+              </Grid>
+            </Box>
+            <Divider />
+            <Box>
+              <Text fontWeight="medium" mb={2}>Response</Text>
+              <Text fontSize="sm" whiteSpace="pre-wrap">{result.response}</Text>
+            </Box>
+            <ResponseAnalysis config={result.config} />
+          </VStack>
+        </CardBody>
+      </MotionCard>
+    );
+  };
+
   return (
-    <Box p={6}>
-      <Stack spacing={6} align="stretch">
-        <Card>
+    <Grid templateColumns={{ base: '1fr', lg: '450px 1fr' }} gap={6}>
+      <GridItem>
+        <Card position="sticky" top="4">
           <CardBody>
-            <Stack spacing={4} align="stretch">
+            <VStack spacing={6} align="stretch">
               <FormControl>
                 <FormLabel>Model</FormLabel>
                 <Select
                   value={config.model}
                   onChange={(e) => handleConfigChange('model', e.target.value)}
+                  bg={colorMode === 'dark' ? 'gray.700' : 'gray.50'}
                 >
                   <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                   <option value="gpt-4">GPT-4</option>
@@ -173,6 +240,7 @@ const Playground: React.FC = () => {
                   value={config.systemPrompt}
                   onChange={(e) => handleConfigChange('systemPrompt', e.target.value)}
                   rows={3}
+                  resize="vertical"
                 />
               </FormControl>
 
@@ -181,157 +249,224 @@ const Playground: React.FC = () => {
                 <Textarea
                   value={config.userPrompt}
                   onChange={(e) => handleConfigChange('userPrompt', e.target.value)}
-                  rows={3}
+                  rows={4}
+                  resize="vertical"
                 />
               </FormControl>
 
-              <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                <FormControl>
-                  <FormLabel>Temperature</FormLabel>
-                  <NumberInput
-                    value={config.temperature}
-                    onChange={(_, val) => handleConfigChange('temperature', val)}
-                    min={0}
-                    max={2}
-                    step={0.1}
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
+              <Tabs variant="soft-rounded" colorScheme="brand" size="sm">
+                <TabList>
+                  <Tab>Basic</Tab>
+                  <Tab>Advanced</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel px={0}>
+                    <VStack spacing={4}>
+                      <FormControl>
+                        <FormLabel>Temperature</FormLabel>
+                        <NumberInput
+                          value={config.temperature}
+                          onChange={(_, val) => handleConfigChange('temperature', val)}
+                          min={0}
+                          max={2}
+                          step={0.1}
+                          precision={1}
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </FormControl>
 
-                <FormControl>
-                  <FormLabel>Max Tokens</FormLabel>
-                  <NumberInput
-                    value={config.maxTokens}
-                    onChange={(_, val) => handleConfigChange('maxTokens', val)}
-                    min={1}
-                    max={2000}
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
+                      <FormControl>
+                        <FormLabel>Max Tokens</FormLabel>
+                        <NumberInput
+                          value={config.maxTokens}
+                          onChange={(_, val) => handleConfigChange('maxTokens', val)}
+                          min={1}
+                          max={2000}
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </FormControl>
+                    </VStack>
+                  </TabPanel>
+                  <TabPanel px={0}>
+                    <VStack spacing={4}>
+                      <FormControl>
+                        <FormLabel>Presence Penalty</FormLabel>
+                        <NumberInput
+                          value={config.presencePenalty}
+                          onChange={(_, val) => handleConfigChange('presencePenalty', val)}
+                          min={-2}
+                          max={2}
+                          step={0.1}
+                          precision={1}
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </FormControl>
 
-                <FormControl>
-                  <FormLabel>Presence Penalty</FormLabel>
-                  <NumberInput
-                    value={config.presencePenalty}
-                    onChange={(_, val) => handleConfigChange('presencePenalty', val)}
-                    min={-2}
-                    max={2}
-                    step={0.1}
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
+                      <FormControl>
+                        <FormLabel>Frequency Penalty</FormLabel>
+                        <NumberInput
+                          value={config.frequencyPenalty}
+                          onChange={(_, val) => handleConfigChange('frequencyPenalty', val)}
+                          min={-2}
+                          max={2}
+                          step={0.1}
+                          precision={1}
+                        >
+                          <NumberInputField />
+                          <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                          </NumberInputStepper>
+                        </NumberInput>
+                      </FormControl>
 
-                <FormControl>
-                  <FormLabel>Frequency Penalty</FormLabel>
-                  <NumberInput
-                    value={config.frequencyPenalty}
-                    onChange={(_, val) => handleConfigChange('frequencyPenalty', val)}
-                    min={-2}
-                    max={2}
-                    step={0.1}
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-              </Grid>
+                      <FormControl>
+                        <FormLabel>Stop Sequence</FormLabel>
+                        <Textarea
+                          value={config.stopSequence || ''}
+                          onChange={(e) => handleConfigChange('stopSequence', e.target.value)}
+                          placeholder="Optional stop sequence"
+                          size="sm"
+                        />
+                      </FormControl>
+                    </VStack>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
 
-              <FormControl>
-                <FormLabel>Stop Sequence</FormLabel>
-                <Textarea
-                  value={config.stopSequence || ''}
-                  onChange={(e) => handleConfigChange('stopSequence', e.target.value)}
-                  placeholder="Optional stop sequence"
-                />
-              </FormControl>
-
-              <Stack spacing={4} direction="row">
+              <Stack spacing={4} direction={{ base: 'column', sm: 'row' }}>
                 <Button
-                  colorScheme="blue"
+                  colorScheme="brand"
                   onClick={generateResponse}
                   isLoading={isSingleLoading}
                   isDisabled={isGridLoading}
+                  flex="1"
+                  size="lg"
+                  fontSize="md"
+                  leftIcon={<Icon as={RiSendPlaneFill} />}
+                  _hover={{
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'lg',
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: 'md',
+                  }}
                 >
-                  Generate Single Response
+                  Generate Response
                 </Button>
                 <Button
-                  colorScheme="green"
+                  colorScheme="brand"
+                  variant="outline"
                   onClick={generateGrid}
                   isLoading={isGridLoading}
                   isDisabled={isSingleLoading}
+                  flex="1"
+                  size="lg"
+                  fontSize="md"
+                  leftIcon={<Icon as={RiGridFill} />}
+                  _hover={{
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'lg',
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: 'md',
+                  }}
                 >
-                  Generate Grid Results
+                  Generate Grid
                 </Button>
               </Stack>
-            </Stack>
+            </VStack>
           </CardBody>
         </Card>
+      </GridItem>
 
-        {results.length > 0 && (
-          <Card>
-            <CardBody>
-              <Text fontSize="xl" mb={4}>Single Results</Text>
-              <Stack spacing={4} align="stretch">
-                {results.map((result, index) => (
-                  <Box key={index} p={4} borderWidth={1} borderRadius="md">
-                    <Text fontWeight="bold">Configuration:</Text>
-                    <Text>Temperature: {result.config.temperature}</Text>
-                    <Text>Max Tokens: {result.config.maxTokens}</Text>
-                    <Text>Presence Penalty: {result.config.presencePenalty}</Text>
-                    <Text>Frequency Penalty: {result.config.frequencyPenalty}</Text>
-                    <Text fontWeight="bold" mt={2}>Response:</Text>
-                    <Text>{result.response}</Text>
-                    <ResponseAnalysis config={result.config} />
+      <GridItem>
+        <VStack spacing={6} align="stretch" h="100%">
+          {results.length > 0 ? (
+            <AnimatePresence>
+              {results.map((result, index) => (
+                <ResultCard key={index} result={result} index={index} />
+              ))}
+            </AnimatePresence>
+          ) :  gridResults.length === 0 ? (
+            <Card h="100%">
+              <CardBody>
+                <VStack py={12} justify="center" align="center" spacing={4} h="100%">
+                  <Box
+                    p={4}
+                    borderRadius="full"
+                    bg={colorMode === 'dark' ? 'brand.900' : 'brand.50'}
+                    color={colorMode === 'dark' ? 'brand.200' : 'brand.600'}
+                  >
+                    <Icon as={RiAiGenerate} boxSize={8} />
                   </Box>
-                ))}
-              </Stack>
-            </CardBody>
-          </Card>
-        )}
+                  <VStack spacing={1}>
+                    <Text fontSize="lg" fontWeight="medium">No Responses Yet</Text>
+                    <Text color={colorMode === 'dark' ? 'gray.400' : 'gray.600'} textAlign="center">
+                      Configure your parameters and click "Generate Response" to see the AI-generated content appear here.
+                    </Text>
+                  </VStack>
+                </VStack>
+              </CardBody>
+            </Card>
+          ) : null}
 
-        {gridResults.length > 0 && (
-          <Card>
-            <CardBody>
-              <Text fontSize="xl" mb={4}>Grid Results</Text>
-              <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
-                {gridResults.map((result, index) => (
-                  <GridItem key={index}>
-                    <Box p={4} borderWidth={1} borderRadius="md">
-                      <Text fontWeight="bold">Configuration:</Text>
-                      <Text>Temperature: {result.temperature}</Text>
-                      <Text>Max Tokens: {result.maxTokens}</Text>
-                      <Text>Presence Penalty: {result.presencePenalty}</Text>
-                      <Text>Frequency Penalty: {result.frequencyPenalty}</Text>
-                      <Text fontWeight="bold" mt={2}>Response:</Text>
-                      <Text>{result.response}</Text>
-                      <ResponseAnalysis config={result} />
-                    </Box>
-                  </GridItem>
-                ))}
-              </Grid>
-            </CardBody>
-          </Card>
-        )}
-      </Stack>
-    </Box>
+          {gridResults.length > 0 && (
+            <Card>
+              <CardHeader>
+                <Text fontSize="xl" fontWeight="medium">Grid Results</Text>
+              </CardHeader>
+              <CardBody>
+                <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
+                  {gridResults.map((result, index) => (
+                    <GridItem key={index}>
+                      <Card variant="outline" size="sm">
+                        <CardBody>
+                          <VStack align="stretch" spacing={3}>
+                            <Box>
+                              <Text fontWeight="medium" fontSize="sm" mb={2}>Configuration</Text>
+                              <Grid templateColumns="repeat(2, 1fr)" gap={2}>
+                                <Text fontSize="xs">Temperature: {result.temperature}</Text>
+                                <Text fontSize="xs">Max Tokens: {result.maxTokens}</Text>
+                                <Text fontSize="xs">Presence Penalty: {result.presencePenalty}</Text>
+                                <Text fontSize="xs">Frequency Penalty: {result.frequencyPenalty}</Text>
+                              </Grid>
+                            </Box>
+                            <Divider />
+                            <Box>
+                              <Text fontWeight="medium" fontSize="sm" mb={2}>Response</Text>
+                              <Text fontSize="xs" whiteSpace="pre-wrap">{result.response}</Text>
+                            </Box>
+                            <ResponseAnalysis config={result} />
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                    </GridItem>
+                  ))}
+                </Grid>
+              </CardBody>
+            </Card>
+          )}
+        </VStack>
+      </GridItem>
+    </Grid>
   );
 };
 

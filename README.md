@@ -1,85 +1,99 @@
 # Interactive Prompt Playground
 
-A powerful web application for experimenting with OpenAI's language models and understanding how different parameters affect the output. This playground allows you to generate product descriptions while adjusting various parameters to see their impact on the generated text.
+A modern, intuitive interface for experimenting with OpenAI's language models. This playground allows you to understand how different parameters affect AI-generated content.
 
-## Screenshots
+<img width="1464" alt="Screenshot 2025-05-29 at 4 46 15 PM" src="https://github.com/user-attachments/assets/4a010404-4086-4f11-a99c-8920dbd6b51d" />
+</br>
+</br>
 
-### Single Response Mode
-[Screenshot showing single response with parameter analysis will be added here]
+<img width="1458" alt="Screenshot 2025-05-29 at 4 46 34 PM" src="https://github.com/user-attachments/assets/072fa557-fff7-4df2-8fb9-c7922ed0bd05" />
 
-### Grid Analysis Mode
-[Screenshot showing grid view with multiple parameter combinations will be added here]
+## ✨ Features
 
-## Features
+- 🎨 Modern, clean UI with dark/light mode support
+- 🔄 Real-time response generation
+- 📊 Parameter experimentation with:
+  - Temperature control
+  - Max tokens limit
+  - Presence and frequency penalties
+  - Stop sequences
+- 📱 Fully responsive design
+- 🌐 Support for multiple models (GPT-3.5 Turbo, GPT-4)
+- 📋 One-click copy for responses
+- 📈 Grid view for comparing multiple parameter combinations
+- 💡 Detailed analysis of parameter effects
+- ⚡️ Built with modern tech stack
 
-- **Model Selection**: Choose between GPT-3.5 Turbo and GPT-4
-- **Parameter Control**:
-  - Temperature (0.0 - 2.0)
-  - Max Tokens (1 - 2000)
-  - Presence Penalty (-2.0 - 2.0)
-  - Frequency Penalty (-2.0 - 2.0)
-- **Custom Prompts**:
-  - System prompt configuration
-  - User prompt input
-  - Optional stop sequence
-- **Output Visualization**:
-  - Single response generation with detailed analysis
-  - Grid view comparing multiple parameter combinations
-  - Real-time parameter effect explanations
-- **Analysis Features**:
-  - Temperature impact analysis
-  - Token length effect analysis
-  - Penalty settings analysis
-  - Comparative response analysis
+## 🛠 Tech Stack
 
-## Project Structure
+- React + TypeScript
+- Vite
+- Chakra UI
+- Framer Motion
+- Express.js backend
+- OpenAI API
 
-```
-src/
-├── components/
-│   ├── Playground.tsx      # Main playground component
-│   └── ResponseAnalysis.tsx # Analysis display component
-├── utils/
-│   └── analysisUtils.ts    # Parameter analysis utilities
-└── types/
-    └── playground.ts       # TypeScript interfaces and defaults
-```
+## 🚀 Getting Started
 
-## Setup
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- OpenAI API key
+
+### Installation
 
 1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd interactive-prompt-playground
-   ```
+```bash
+git clone https://github.com/yourusername/interactive-prompt-playground.git
+cd interactive-prompt-playground
+```
 
 2. Install dependencies:
-   ```bash
-   npm install --legacy-peer-deps
-   ```
+```bash
+npm install
+```
 
 3. Create a `.env` file in the root directory:
-   ```bash
-   cp .env.example .env
-   ```
-   Then edit the `.env` file and add your OpenAI API key:
-   ```
-   # IMPORTANT: Never commit this file or share your API key
-   OPENAI_API_KEY=your_api_key_here
-   ```
+```env
+OPENAI_API_KEY=your_api_key_here
+```
 
 4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev
+```
 
-5. Open your browser and navigate to `http://localhost:5173`
+The app will be available at `http://localhost:5173`
 
-## Security Note
+## 🎮 Usage
 
-⚠️ **Important**: Never commit your `.env` file or expose your API keys. The `.env` file is listed in `.gitignore` to prevent accidental commits. If you accidentally commit sensitive information:
+1. **Select Model**: Choose between GPT-3.5 Turbo and GPT-4
 
-1. Immediately revoke the exposed API key
-2. Generate a new API key
-3. Update your local `.env` file with the new key
-4. Consider using git-filter-repo to remove sensitive data from git history
+2. **Configure Prompts**:
+   - Set your system prompt to define the AI's role
+   - Enter your user prompt for specific instructions
+
+3. **Adjust Parameters**:
+   - Basic tab:
+     - Temperature (0-2): Controls randomness
+     - Max Tokens (1-2000): Limits response length
+   - Advanced tab:
+     - Presence Penalty (-2 to 2): Reduces repetition
+     - Frequency Penalty (-2 to 2): Controls word frequency
+     - Stop Sequence: Defines where to stop generating
+
+4. **Generate Content**:
+   - Use "Generate Response" for single outputs
+   - Use "Generate Grid" to compare multiple parameter combinations
+
+5. **Analyze Results**:
+   - View parameter effects analysis
+   - Compare different configurations
+   - Copy responses with one click
+
+## 🙏 Acknowledgments
+
+- Built with [Chakra UI](https://chakra-ui.com/)
+- Powered by [OpenAI API](https://openai.com/api/)
+- Icons from [React Icons](https://react-icons.github.io/react-icons/)
