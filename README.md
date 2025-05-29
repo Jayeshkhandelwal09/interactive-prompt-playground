@@ -2,11 +2,20 @@
 
 A modern, intuitive interface for experimenting with OpenAI's language models. This playground allows you to understand how different parameters affect AI-generated content.
 
+# Singe Prompt Response
 <img width="1464" alt="Screenshot 2025-05-29 at 4 46 15 PM" src="https://github.com/user-attachments/assets/4a010404-4086-4f11-a99c-8920dbd6b51d" />
 </br>
 </br>
-
 <img width="1458" alt="Screenshot 2025-05-29 at 4 46 34 PM" src="https://github.com/user-attachments/assets/072fa557-fff7-4df2-8fb9-c7922ed0bd05" />
+
+# Grid Prompt Response
+
+<img width="1465" alt="Screenshot 2025-05-29 at 5 11 22 PM" src="https://github.com/user-attachments/assets/fc0d0716-9f3c-4e4d-a7d2-4a691f9bd46a" />
+</br>
+</br>
+<img width="1467" alt="Screenshot 2025-05-29 at 5 11 54 PM" src="https://github.com/user-attachments/assets/73347c84-2db8-4dd3-9aef-2b66bca83765" />
+
+
 
 ## ✨ Features
 
